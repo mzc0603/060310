@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="短网址生成器 - 简单高效的在线URL缩短工具，一键生成短链接，支持复制和历史记录">
+    <meta name="keywords" content="短网址,短链接,URL缩短,在线工具,链接简化">
+    <meta name="author" content="Dwz.me">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="短网址生成器 - 快速简化你的链接">
+    <meta property="og:description" content="简单高效的在线URL缩短工具，一键生成短链接，支持一键复制和历史记录">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://d.me">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="短网址生成器">
+    <meta name="twitter:description" content="简单高效的在线URL缩短工具">
+    <title>短网址生成器 - 快速简化你的长链接</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563EB;
+            --primary-dark: #1E40AF;
+            --success: #10B981;
+            --success-dark: #059669;
+            --bg: #F8FAFC;
+            --text: #1E293B;
+            --text-light: #64748B;
+            --border: #E2E8F0;
+            --white: #FFFFFF;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            flex: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon svg {
+            width: 28px;
+            height: 28px;
+            fill: white;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 16px;
+            margin-top: 8px;
+        }
+
+        .main-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            gap: 12px;
+        }
+
+        input[type="url"], input[type="text"] {
+            flex: 1;
+            padding: 14px 16px;
+            font-size: 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: var(--white);
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        input::placeholder {
+            color: var(--text-light);
+        }
+
+        .btn {
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), var(--success-dark));
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            display: none;
+        }
+
+        .result-section.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-label svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--success);
+        }
+
+        .result-box {
+            display: flex;
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .result-input {
+            flex: 1;
+            background: #F1F5F9;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 16px;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .copy-btn {
+            padding: 14px 24px;
+            min-width: 120px;
+        }
+
+        .copy-btn.copied {
+            background: var(--success);
+        }
+
+        .history-section {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .history-header:hover {
+            background: #F8FAFC;
+        }
+
+        .history-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-title svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-light);
+        }
+
+        .history-count {
+            background: var(--primary);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .history-toggle {
+            width: 24px;
+            height: 24px;
+            fill: var(--text-light);
+            transition: transform 0.3s;
+        }
+
+        .history-header.collapsed .history-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-header.collapsed + .history-list {
+            display: none;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+            transition: background 0.2s;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item:hover {
+            background: #F8FAFC;
+        }
+
+        .history-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .history-short {
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 4px;
+            cursor: pointer;
+        }
+
+        .history-short:hover {
+            text-decoration: underline;
+        }
+
+        .history-original {
+            font-size: 12px;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .history-time {
+            font-size: 12px;
+            color: var(--text-light);
+            white-space: nowrap;
+        }
+
+        .history-delete {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .history-delete:hover {
+            background: #FEE2E2;
+        }
+
+        .history-delete svg {
+            width: 16px;
+            height: 16px;
+            fill: #EF4444;
+        }
+
+        .history-empty {
+            padding: 48px 24px;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        .history-empty svg {
+            width: 48px;
+            height: 48px;
+            fill: var(--border);
+            margin-bottom: 16px;
+        }
+
+        .clear-all-btn {
+            font-size: 13px;
+            color: #EF4444;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .clear-all-btn:hover {
+            background: #FEE2E2;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: #EF4444;
+        }
+
+        .toast svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px 20px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px 16px;
+            }
+
+            .main-card {
+                padding: 24px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .input-wrapper {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .result-box {
+                flex-direction: column;
+            }
+
+            .copy-btn {
+                width: 100%;
+            }
+
+            .history-item {
+                padding: 14px 16px;
+            }
+
+            .history-time {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24"><path d="M3.654 6.287C3.276 6.615 3 7.097 3 7.618c0 .521.276 1.003.654 1.331l5.877 5.014c.38.326.885.53 1.428.53.544 0 1.05-.204 1.428-.53l9.915-8.45c.378-.328.654-.81.654-1.331 0-.521-.276-1.003-.654-1.331L11.387.535a1.897 1.897 0 00-1.814 0L3.654 6.287zm13.14.72L8.12 15.63c-.094.08-.21.123-.337.123a.95.95 0 01-.338-.123l-.955-.813a.048.048 0 01-.03-.03L5.21 13.54a.048.048 0 01-.03-.03l.955-.813a.95.95 0 01.338-.123c.127 0 .243.042.337.123l8.674 8.397c.095.09.15.21.15.338s-.055.248-.15.338z"/></svg>
+                </div>
+                <h1>短网址生成器</h1>
+            </div>
+            <p class="subtitle">简单高效，一键缩短你的长链接</p>
+        </header>
+
+        <main>
+            <div class="main-card">
+                <div class="input-group">
+                    <label class="input-label" for="url-input">输入长链接</label>
+                    <div class="input-wrapper">
+                        <input type="url" id="url-input" placeholder="https://example.com/very/long/url/path" autocomplete="off" spellcheck="false">
+                        <button class="btn btn-primary" id="generate-btn" onclick="generateShortUrl()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13.768 12.072l-3.541-3.541a5.059 5.059 0 117.082-7.162l-4.22 4.22a1.875 1.875 0 11-2.652-2.652l4.22-4.22a5.06 5.06 0 010 7.162l-3.536 3.536a5.063 5.063 0 01-7.163 0 5.063 5.063 0 010-7.163l3.54-3.541a.938.938 0 011.326 0l3.54 3.541a2.19 2.19 0 010 3.094z"/></svg>
+                            生成
+                        </button>
+                    </div>
+                </div>
+
+                <div class="result-section" id="result-section">
+                    <div class="result-label">
+                        <svg viewBox="0 0 24 24"><path d="M8.25 8.625l6.003 6.003a3.75 3.75 0 010-5.303l-1.126-1.126a3.75 3.75 0 010 5.303l-4.5 4.5a3.75 3.75 0 01-5.25-5.25l6.003-6.003 1.872 1.872a2.25 2.25 0 103.182-3.182l-5.054-5.054a2.25 2.25 0 00-3.182 3.182l1.872 1.872-1.872 1.872 1.872 1.872z"/></svg>
+                        短链接已生成
+                    </div>
+                    <div class="result-box">
+                        <input type="text" class="result-input" id="result-input" readonly>
+                        <button class="btn btn-success copy-btn" id="copy-btn" onclick="copyToClipboard()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7.5 6.75V0h9v6.75h-9zm9 3H7.5C5.015 9.75 3 11.765 3 14.25S5.015 18.75 7.5 18.75h9C18.985 18.75 21 16.735 21 14.25S18.985 9.75 16.5 9.75zm-9 4.5c-1.035 0-1.875-.84-1.875-1.875s.84-1.875 1.875-1.875 1.875.84 1.875 1.875-.84 1.875-1.875 1.875zm9 0c-1.035 0-1.875-.84-1.875-1.875s.84-1.875 1.875-1.875 1.875.84 1.875 1.875-.84 1.875-1.875 1.875z"/></svg>
+                            复制
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <div class="history-header" id="history-header" onclick="toggleHistory()">
+                    <div class="history-title">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                        生成历史
+                        <span class="history-count" id="history-count">0</span>
+                    </div>
+                    <button class="clear-all-btn" id="clear-all-btn" onclick="clearAllHistory(event)" style="display: none;">清空</button>
+                    <svg class="history-toggle" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                </div>
+                <div class="history-list" id="history-list">
+                    <div class="history-empty" id="history-empty">
+                        <svg viewBox="0 0 24 24"><path d="M13.5 2c-5.288 0-9.649 3.914-10.377 9h-3.123l4 5.917 4-5.917h-2.847c.711-3.972 4.174-7 8.347-7 4.687 0 8.5 3.813 8.5 8.5s-3.813 8.5-8.5 8.5c-3.015 0-5.662-1.583-7.171-3.957l-1.2 1.775c1.916 2.536 4.948 4.182 8.371 4.182 5.797 0 10.5-4.702 10.5-10.5S19.297 2 13.5 2z"/></svg>
+                        <p>暂无生成记录</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>快速简化长链接，告别繁琐URL</p>
+    </footer>
+
+    <div class="toast" id="toast">
+        <svg viewBox="0 0 24 24" id="toast-icon"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+        <span id="toast-message">复制成功</span>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'short_url_history';
+        const MAX_HISTORY = 50;
+        const BASE62 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const BASE_URL = 'https://d.me/';
+
+        let currentShortUrl = '';
+
+        function loadHistory() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                return data ? JSON.parse(data) : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function saveHistory(history) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+            } catch (e) {
+                console.warn('Failed to save history:', e);
+            }
+        }
+
+        function generateShortCode() {
+            let code = '';
+            const timestamp = Date.now().toString(36);
+            const random = Math.random().toString(36).substring(2, 6);
+            code = timestamp.slice(-4) + random;
+            if (code.length < 6) {
+                code += Math.random().toString(36).substring(2, 6 - code.length + 2);
+            }
+            return code.slice(0, 6);
+        }
+
+        function validateUrl(url) {
+            if (!url || url.trim() === '') return false;
+            let testUrl = url.trim();
+            if (!testUrl.match(/^https?:\/\//i)) {
+                testUrl = 'https://' + testUrl;
+            }
+            try {
+                new URL(testUrl);
+                return testUrl;
+            } catch {
+                return false;
+            }
+        }
+
+        function generateShortUrl() {
+            const input = document.getElementById('url-input');
+            const resultSection = document.getElementById('result-section');
+            const resultInput = document.getElementById('result-input');
+            const generateBtn = document.getElementById('generate-btn');
+
+            const validatedUrl = validateUrl(input.value);
+
+            if (!validatedUrl) {
+                showToast('请输入有效的网址', 'error');
+                input.focus();
+                return;
+            }
+
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V2A10 10 0 002 12h2a8 8 0 018-8z"/></svg> 生成中...';
+
+            setTimeout(() => {
+                const shortCode = generateShortCode();
+                const shortUrl = BASE_URL + shortCode;
+
+                currentShortUrl = shortUrl;
+                resultInput.value = shortUrl;
+                resultSection.classList.add('show');
+
+                const history = loadHistory();
+                history.unshift({
+                    id: Date.now(),
+                    original: validatedUrl,
+                    short: shortUrl,
+                    code: shortCode,
+                    created: new Date().toLocaleString('zh-CN')
+                });
+
+                if (history.length > MAX_HISTORY) {
+                    history.pop();
+                }
+
+                saveHistory(history);
+                renderHistory();
+
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13.768 12.072l-3.541-3.541a5.059 5.059 0 117.082-7.162l-4.22 4.22a1.875 1.875 0 11-2.652-2.652l4.22-4.22a5.06 5.06 0 010 7.162l-3.536 3.536a5.063 5.063 0 01-7.163 0 5.063 5.063 0 010-7.163l3.54-3.541a.938.938 0 011.326 0l3.54 3.541a2.19 2.19 0 010 3.094z"/></svg> 生成';
+
+                showToast('短链接已生成', 'success');
+                input.value = '';
+            }, 300);
+        }
+
+        function copyToClipboard() {
+            if (!currentShortUrl) return;
+
+            const copyBtn = document.getElementById('copy-btn');
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(currentShortUrl).then(() => {
+                    showCopySuccess();
+                }).catch(() => {
+                    fallbackCopy(currentShortUrl);
+                });
+            } else {
+                fallbackCopy(currentShortUrl);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showCopySuccess();
+            } catch {
+                showToast('复制失败，请手动选择复制', 'error');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function showCopySuccess() {
+            const copyBtn = document.getElementById('copy-btn');
+            copyBtn.classList.add('copied');
+            copyBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg> 已复制';
+            showToast('复制成功', 'success');
+
+            setTimeout(() => {
+                copyBtn.classList.remove('copied');
+                copyBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7.5 6.75V0h9v6.75h-9zm9 3H7.5C5.015 9.75 3 11.765 3 14.25S5.015 18.75 7.5 18.75h9C18.985 18.75 21 16.735 21 14.25S18.985 9.75 16.5 9.75zm-9 4.5c-1.035 0-1.875-.84-1.875-1.875s.84-1.875 1.875-1.875 1.875.84 1.875 1.875-.84 1.875-1.875 1.875zm9 0c-1.035 0-1.875-.84-1.875-1.875s.84-1.875 1.875-1.875 1.875.84 1.875 1.875-.84 1.875-1.875 1.875z"/></svg> 复制';
+            }, 2000);
+        }
+
+        function renderHistory() {
+            const history = loadHistory();
+            const list = document.getElementById('history-list');
+            const empty = document.getElementById('history-empty');
+            const countEl = document.getElementById('history-count');
+            const clearBtn = document.getElementById('clear-all-btn');
+
+            countEl.textContent = history.length;
+            clearBtn.style.display = history.length > 0 ? 'block' : 'none';
+
+            if (history.length === 0) {
+                list.innerHTML = '<div class="history-empty" id="history-empty"><svg viewBox="0 0 24 24"><path d="M13.5 2c-5.288 0-9.649 3.914-10.377 9h-3.123l4 5.917 4-5.917h-2.847c.711-3.972 4.174-7 8.347-7 4.687 0 8.5 3.813 8.5 8.5s-3.813 8.5-8.5 8.5c-3.015 0-5.662-1.583-7.171-3.957l-1.2 1.775c1.916 2.536 4.948 4.182 8.371 4.182 5.797 0 10.5-4.702 10.5-10.5S19.297 2 13.5 2z"/></svg><p>暂无生成记录</p></div>';
+                return;
+            }
+
+            list.innerHTML = history.map(item => `
+                <div class="history-item" data-id="${item.id}">
+                    <div class="history-info">
+                        <div class="history-short" onclick="recopyShortUrl('${item.short}')">${item.short}</div>
+                        <div class="history-original" title="${escapeHtml(item.original)}">${escapeHtml(item.original)}</div>
+                    </div>
+                    <div class="history-time">${item.created}</div>
+                    <button class="history-delete" onclick="deleteHistoryItem(${item.id})" title="删除">
+                        <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function recopyShortUrl(url) {
+            currentShortUrl = url;
+            copyToClipboard();
+        }
+
+        function deleteHistoryItem(id) {
+            event.stopPropagation();
+            let history = loadHistory();
+            history = history.filter(item => item.id !== id);
+            saveHistory(history);
+            renderHistory();
+            showToast('已删除', 'success');
+        }
+
+        function clearAllHistory(event) {
+            event.stopPropagation();
+            if (confirm('确定要清空所有历史记录吗？')) {
+                saveHistory([]);
+                renderHistory();
+                showToast('已清空', 'success');
+            }
+        }
+
+        function toggleHistory() {
+            const header = document.getElementById('history-header');
+            header.classList.toggle('collapsed');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMessage.textContent = message;
+            toast.className = 'toast ' + type;
+
+            if (type === 'success') {
+                toastIcon.innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>';
+            } else if (type === 'error') {
+                toastIcon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>';
+            }
+
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        document.getElementById('url-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateShortUrl();
+            }
+        });
+
+        document.getElementById('result-input').addEventListener('click', function() {
+            this.select();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderHistory();
+        });
+    </script>
+</body>
+</html>
